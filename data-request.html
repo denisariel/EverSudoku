@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Request your personal information stored by EverSudoku">
+    <title>EverSudoku – Personal Data Request</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="form-page">
+    <main class="data-request">
+        <section class="form-card" aria-labelledby="data-request-title">
+            <p><a class="link" href="index.html">&larr; Back to home</a></p>
+            <h1 id="data-request-title">Personal Data Request</h1>
+            <p>
+                Use this form to request the personal information that may be stored by the EverSudoku app. 
+                We will review your submission and respond within 30 days as required by applicable privacy regulations.
+            </p>
+            <p>
+                Please provide enough detail for us to locate your data. Fields marked with an asterisk (<span aria-hidden="true">*</span>) are required.
+            </p>
+
+            <form id="data-request-form" class="form" method="POST" action="https://formsubmit.co/keehagames@gmail.com">
+                <div class="form-grid">
+                    <div class="form-field">
+                        <label for="full-name">Full name *</label>
+                        <input type="text" id="full-name" name="full_name" placeholder="Jane Doe" required autocomplete="name">
+                    </div>
+
+                    <div class="form-field">
+                        <label for="email">Email address *</label>
+                        <input type="email" id="email" name="email" placeholder="you@example.com" required autocomplete="email">
+                    </div>
+
+                    <div class="form-field">
+                        <label for="location">Country or region</label>
+                        <input type="text" id="location" name="location" placeholder="United States" autocomplete="country-name">
+                    </div>
+
+                    <div class="form-field">
+                        <label for="app-platform">Platform used</label>
+                        <select id="app-platform" name="app_platform">
+                            <option value="" selected>Choose an option</option>
+                            <option value="ios">iOS</option>
+                            <option value="android">Android</option>
+                            <option value="web">Web</option>
+                            <option value="desktop">Desktop</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="form-field form-grid-full">
+                        <label for="account-id">User ID or account email</label>
+                        <input type="text" id="account-id" name="user_identifier" placeholder="Username, account email, or other identifier" autocomplete="off">
+                        <p class="form-help">Providing an account identifier helps us find the right data faster.</p>
+                    </div>
+
+                    <div class="form-field form-grid-full">
+                        <label for="request-details">Describe your request *</label>
+                        <textarea id="request-details" name="request_details" placeholder="Let us know what information you would like to receive." required></textarea>
+                    </div>
+
+                    <div class="form-field form-grid-full">
+                        <label for="preferred-response">Preferred response method</label>
+                        <select id="preferred-response" name="preferred_response_method">
+                            <option value="" selected>Choose an option</option>
+                            <option value="email">Email</option>
+                            <option value="in-app">In-app message</option>
+                            <option value="phone">Phone</option>
+                            <option value="mail">Postal mail</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-checkbox">
+                    <input type="checkbox" id="confirm-accuracy" name="confirmation_accuracy" required>
+                    <label for="confirm-accuracy">I confirm the information provided is accurate and that I am the individual whose data is being requested. *</label>
+                </div>
+
+                <div class="form-checkbox">
+                    <input type="checkbox" id="confirm-contact" name="confirmation_contact" required>
+                    <label for="confirm-contact">I understand EverSudoku may need to contact me to verify my identity before completing this request. *</label>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary">Submit request</button>
+                    <p id="form-status" class="form-status" role="status" aria-live="polite"></p>
+                </div>
+
+                <input type="hidden" name="_subject" value="EverSudoku Personal Data Request">
+                <input type="hidden" name="_template" value="table">
+            </form>
+        </section>
+    </main>
+
+    <script>
+        (function () {
+            const form = document.getElementById('data-request-form');
+            const status = document.getElementById('form-status');
+            const submitButton = form.querySelector('button[type="submit"]');
+            const endpoint = 'https://formsubmit.co/ajax/keehagames@gmail.com';
+
+            function setStatus(message, type) {
+                status.textContent = message;
+                status.className = 'form-status';
+                if (type === 'success') {
+                    status.classList.add('is-success');
+                } else if (type === 'error') {
+                    status.classList.add('is-error');
+                }
+            }
+
+            if (!window.fetch) {
+                return;
+            }
+
+            form.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                setStatus('Sending your request…', null);
+                submitButton.disabled = true;
+
+                const formData = new FormData(form);
+                const payload = {};
+                formData.forEach((value, key) => {
+                    if (payload[key]) {
+                        payload[key] = [].concat(payload[key], value);
+                    } else {
+                        payload[key] = value;
+                    }
+                });
+
+                payload._subject = 'EverSudoku Personal Data Request';
+                payload._template = 'table';
+
+                try {
+                    const response = await fetch(endpoint, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) {
+                        const text = await response.text();
+                        throw new Error(text || 'Unable to send request.');
+                    }
+
+                    setStatus('Thank you! Your request has been sent. We will get back to you soon.', 'success');
+                    form.reset();
+                } catch (error) {
+                    console.error(error);
+                    setStatus('Something went wrong while sending your request. Please try again later or email us directly at keehagames@gmail.com.', 'error');
+                } finally {
+                    submitButton.disabled = false;
+                }
+            });
+        })();
+    </script>
+</body>
+</html>
